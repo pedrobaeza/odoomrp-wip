@@ -43,8 +43,10 @@ class ProductConfigurator(models.AbstractModel):
         if not self.product_tmpl_id.attribute_line_ids:
             self.product_id = self.product_tmpl_id.product_variant_ids
         else:
-            if not self.env.context.get('not_reset_product'):
-                self.product_id = False
+            if (self.product_id and
+                    self.product_id.product_tmpl_id != self.product_tmpl_id):
+                if not self.env.context.get('not_reset_product'):
+                    self.product_id = False
             attribute_list = []
             for attribute_line in self.product_tmpl_id.attribute_line_ids:
                 attribute_list.append({
@@ -66,7 +68,6 @@ class ProductConfigurator(models.AbstractModel):
         product_obj = self.env['product.product']
         domain, cont = product_obj._build_attributes_domain(
             self.product_tmpl_id, self.product_attribute_ids)
-        self.product_id = False
         if cont:
             products = product_obj.search(domain)
             # Filter the product with the exact number of attributes values
